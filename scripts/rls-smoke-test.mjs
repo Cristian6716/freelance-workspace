@@ -1,6 +1,8 @@
 // RLS smoke test — verifica che user A non possa leggere dati di user B.
 // Esegui con: node --env-file=.env.local scripts/rls-smoke-test.mjs
 
+/* eslint-disable no-console -- script di diagnostica dev-only */
+
 import { createClient } from "@supabase/supabase-js";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

@@ -78,5 +78,37 @@ Diario di esecuzione dei batch. Una sezione per batch, append-only.
 ### Aperture per Batch B
 
 - `/dashboard` è ora un placeholder con riepilogo profilo. Il vero layout con sidebar 240px arriva in Batch B.
-- `client_workspaces` esiste con un solo record (creato in step 3 onboarding). La griglia "Workspace card" ancora da costruire.
 - I 15 template sono già nel DB pronti per essere consumati dal selector "+ Nuovo progetto" in Batch B.
+- **Bug latente da diagnosticare in Batch B**: la prima INSERT in `client_workspaces` (più poi `workspace_members`) tentata in produzione ha restituito `Impossibile salvare` (GENERIC_ERROR). I dati Zod erano validi, l'utente autenticato. Sospetto policy RLS che non vede il workspace appena inserito quando la `is_workspace_owner` viene chiamata (read-after-write, anche se le query sono separate). Quando Batch B implementa il dialog "+ Nuovo workspace", verificare con logging server-side l'errore esatto di Supabase (`error.code` + `error.message`) per identificare causa esatta.
+
+---
+
+## Patch post-Batch A — onboarding 2-step (2026-05-06, stesso giorno)
+
+**Trigger**: errore HTTP 431 dopo signup + decisione UX di rimuovere il forzato "primo workspace" dall'onboarding.
+
+### Cambiamenti
+
+1. **HTTP 431 fix** (commit `a8a7be8`):
+   - Aggiunto `cross-env` come dev dep.
+   - `package.json` scripts `dev` e `start` lanciano con `NODE_OPTIONS=--max-http-header-size=32768`.
+   - **Causa**: cookie auth chunked di Supabase con project ref di 20 caratteri superavano il default Node di 16 KB sui request headers, causando il browser a non poter ricaricare le route post-login.
+
+2. **Onboarding 2-step**:
+   - Rimosso step 3 "Primo workspace cliente" (decisione founder: friction inutile, l'utente lo crea dal dashboard).
+   - `completeStep2Action` ora reindirizza direttamente a `/dashboard`.
+   - `OnboardingStep3` component, `completeStep3Action`, `skipStep3Action`, `onboardingStep3Schema` rimossi. `clientTypeEnum` mantenuto per riuso in Batch B.
+   - `OnboardingTopBar` aggiornata: 2 step invece di 3, label "Passo 2 di 2".
+   - Aggiunto logging server-side (`console.error`) sugli errori Supabase nelle Server Actions per diagnosi futura senza esporre PII al client.
+   - ESLint override (`/* eslint-disable no-console */`) sul `scripts/rls-smoke-test.mjs` (script dev-only legittimamente verboso).
+
+### Deviation dal PRD
+
+PRD §Batch A descriveva esplicitamente uno step 3 con primo workspace. Decisione del founder di rimuoverlo per ridurre friction onboarding, dato che il dialog "+ Nuovo workspace" del dashboard (Batch B) coprirà lo stesso flow con campi più completi (telefono, P.IVA cliente, codice SDI, indirizzo).
+
+### Validazione
+
+- ✓ `npm run lint` clean (0 errors, 0 warnings)
+- ✓ `npm run typecheck` clean
+- ✓ `npm run build` succeed (7 routes, 1 in meno per /onboarding sempre, ma stessa file count visto che era un'unica page)
+- ✓ Flow: signup → step 1 → step 2 → /dashboard (atteso, da validare nel browser dopo restart dev)

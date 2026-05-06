@@ -98,25 +98,9 @@ export const onboardingStep2Schema = z.object({
 });
 export type OnboardingStep2Input = z.infer<typeof onboardingStep2Schema>;
 
+// `clientTypeEnum` resta esportato — sarà riusato dal dialog "+ Nuovo workspace"
+// del Batch B che ha più campi (telefono, P.IVA cliente, SDI, indirizzo).
 export const clientTypeEnum = z.enum(["private", "company", "pa"]);
-
-export const onboardingStep3Schema = z.object({
-  client_name: z
-    .string()
-    .trim()
-    .min(2, "Inserisci il nome del cliente")
-    .max(120, "Massimo 120 caratteri"),
-  client_email: z
-    .string()
-    .trim()
-    .toLowerCase()
-    .email("Email non valida")
-    .max(254)
-    .optional()
-    .or(z.literal("")),
-  client_type: clientTypeEnum,
-});
-export type OnboardingStep3Input = z.infer<typeof onboardingStep3Schema>;
 
 // =============================================================================
 // File upload (logo profilo)

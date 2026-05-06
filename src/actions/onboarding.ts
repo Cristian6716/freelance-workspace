@@ -11,7 +11,6 @@ import {
   MAX_LOGO_BYTES,
   onboardingStep1Schema,
   onboardingStep2Schema,
-  onboardingStep3Schema,
 } from "@/lib/validation/schemas";
 import { normalizeIBAN, normalizeItalianVAT } from "@/lib/validation/italian";
 
@@ -59,6 +58,7 @@ export async function completeStep1Action(
     .eq("id", user.id);
 
   if (error) {
+    console.error("[onboarding/step1] update profile failed:", error.code, error.message);
     return { ok: false, error: GENERIC_ERROR };
   }
 
@@ -68,6 +68,8 @@ export async function completeStep1Action(
 
 // =============================================================================
 // Step 2 — Dati profilo (full_name, P.IVA, regime, IBAN, logo)
+// Al successo redirige a /dashboard. La creazione del primo workspace è
+// stata rimossa dall'onboarding (l'utente la fa dal dialog dashboard in Batch B).
 // =============================================================================
 export async function completeStep2Action(
   _prev: OnboardingActionResult | null,
@@ -127,6 +129,7 @@ export async function completeStep2Action(
         upsert: false,
       });
     if (uploadError) {
+      console.error("[onboarding/step2] logo upload failed:", uploadError.message);
       return { ok: false, error: GENERIC_ERROR };
     }
     logo_url = path; // path relativo al bucket; la signed URL è generata on-demand
@@ -144,73 +147,10 @@ export async function completeStep2Action(
     .eq("id", user.id);
 
   if (error) {
+    console.error("[onboarding/step2] update profile failed:", error.code, error.message);
     return { ok: false, error: GENERIC_ERROR };
   }
 
   revalidatePath("/onboarding");
-  redirect("/onboarding");
-}
-
-// =============================================================================
-// Step 3 — Primo workspace cliente (skippabile)
-// =============================================================================
-export async function completeStep3Action(
-  _prev: OnboardingActionResult | null,
-  formData: FormData
-): Promise<OnboardingActionResult> {
-  const parsed = onboardingStep3Schema.safeParse({
-    client_name: formData.get("client_name"),
-    client_email: formData.get("client_email") ?? "",
-    client_type: formData.get("client_type"),
-  });
-
-  if (!parsed.success) {
-    return {
-      ok: false,
-      error: "Controlla i campi e riprova.",
-      fieldErrors: zodToFieldErrors(parsed.error),
-    };
-  }
-
-  const { supabase, user } = await requireUser();
-
-  const { data: workspace, error: wsError } = await supabase
-    .from("client_workspaces")
-    .insert({
-      owner_id: user.id,
-      client_name: parsed.data.client_name,
-      client_type: parsed.data.client_type,
-      client_email: parsed.data.client_email || null,
-    })
-    .select("id")
-    .single();
-
-  if (wsError || !workspace) {
-    return { ok: false, error: GENERIC_ERROR };
-  }
-
-  const ownerEmail = user.email ?? "";
-  const { error: memberError } = await supabase.from("workspace_members").insert({
-    workspace_id: workspace.id,
-    user_id: user.id,
-    email: ownerEmail,
-    role: "owner",
-    accepted_at: new Date().toISOString(),
-  });
-
-  if (memberError) {
-    // Best effort cleanup: prova a eliminare il workspace per non lasciare orfani.
-    await supabase.from("client_workspaces").delete().eq("id", workspace.id);
-    return { ok: false, error: GENERIC_ERROR };
-  }
-
-  redirect("/dashboard");
-}
-
-// =============================================================================
-// Skip step 3 — porta direttamente alla dashboard senza creare workspace
-// =============================================================================
-export async function skipStep3Action(): Promise<void> {
-  await requireUser();
   redirect("/dashboard");
 }

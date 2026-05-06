@@ -52,7 +52,7 @@ export function OnboardingStep2() {
     >
       <div className="text-center mb-2">
         <p className="text-[12px] font-semibold uppercase tracking-widest text-on-surface-variant mb-3">
-          Passo 2 di 3
+          Passo 2 di 2
         </p>
         <h1 className="font-heading text-h2 text-foreground mb-2">
           Raccontaci di te

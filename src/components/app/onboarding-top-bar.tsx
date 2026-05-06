@@ -1,12 +1,11 @@
 import { signOutAction } from "@/actions/auth";
 
-const STEP_TITLES: Record<1 | 2 | 3, string> = {
+const STEP_TITLES: Record<1 | 2, string> = {
   1: "Scegli il tuo profilo",
   2: "I tuoi dati fiscali",
-  3: "Il tuo primo cliente",
 };
 
-export function OnboardingTopBar({ currentStep }: { currentStep: 1 | 2 | 3 }) {
+export function OnboardingTopBar({ currentStep }: { currentStep: 1 | 2 }) {
   return (
     <header className="fixed top-0 left-0 right-0 w-full bg-background/90 backdrop-blur z-50">
       <div className="flex items-center justify-between h-16 px-gutter max-w-[1280px] mx-auto">
@@ -16,8 +15,8 @@ export function OnboardingTopBar({ currentStep }: { currentStep: 1 | 2 | 3 }) {
           <span className="text-[10px] font-semibold uppercase tracking-widest text-secondary">
             {STEP_TITLES[currentStep]}
           </span>
-          <ol className="flex items-center gap-2" aria-label={`Passo ${currentStep} di 3`}>
-            {[1, 2, 3].map((step) => (
+          <ol className="flex items-center gap-2" aria-label={`Passo ${currentStep} di 2`}>
+            {[1, 2].map((step) => (
               <li
                 key={step}
                 aria-current={step === currentStep ? "step" : undefined}
