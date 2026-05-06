@@ -1,0 +1,279 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design system — Material You palette dal mockup HTML (docs/html_screenshots/onboarding.html)
+ * Token shadcn (--background, --primary, --card, ecc.) sono mappati su M3.
+ * Token M3 estesi (--surface-container, --primary-container, ecc.) sono additivi
+ * e accessibili via utility Tailwind generate dal blocco @theme inline.
+ */
+
+@theme inline {
+  /* shadcn tokens → M3 mapping */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* M3 estesi (surface, container, fixed, outline, inverse) */
+  --color-surface: var(--surface);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-surface-variant: var(--surface-variant);
+  --color-surface-bright: var(--surface-bright);
+  --color-surface-dim: var(--surface-dim);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-secondary-container: var(--secondary-container);
+  --color-on-secondary-container: var(--on-secondary-container);
+  --color-tertiary: var(--tertiary);
+  --color-on-tertiary: var(--on-tertiary);
+  --color-tertiary-container: var(--tertiary-container);
+  --color-on-tertiary-container: var(--on-tertiary-container);
+  --color-error-container: var(--error-container);
+  --color-on-error-container: var(--on-error-container);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+  --color-inverse-surface: var(--inverse-surface);
+  --color-inverse-on-surface: var(--inverse-on-surface);
+  --color-inverse-primary: var(--inverse-primary);
+
+  /* Typography — Newsreader (heading), Inter (body) */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-heading: var(--font-newsreader), ui-serif, Georgia, "Times New Roman", serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Type scale dal mockup */
+  --text-h1: 40px;
+  --text-h1--line-height: 1.2;
+  --text-h1--letter-spacing: -0.02em;
+  --text-h1--font-weight: 500;
+  --text-h2: 32px;
+  --text-h2--line-height: 1.25;
+  --text-h2--font-weight: 500;
+  --text-h3: 24px;
+  --text-h3--line-height: 1.3;
+  --text-h3--font-weight: 500;
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 1.6;
+  --text-body-lg--font-weight: 400;
+  --text-body-md: 16px;
+  --text-body-md--line-height: 1.5;
+  --text-body-md--font-weight: 400;
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 1.5;
+  --text-body-sm--font-weight: 400;
+  --text-label-caps: 12px;
+  --text-label-caps--line-height: 1;
+  --text-label-caps--letter-spacing: 0.05em;
+  --text-label-caps--font-weight: 600;
+
+  /* Spacing tokens specifici dal mockup */
+  --spacing-gutter: 24px;
+  --spacing-section-gap: 32px;
+  --spacing-element-gap: 24px;
+  --spacing-container-padding: 40px;
+
+  /* Shadow elevation level-2 dal mockup */
+  --shadow-level-2: 0 12px 20px -4px rgb(28 27 31 / 0.05), 0 4px 6px -2px rgb(28 27 31 / 0.02);
+
+  /* Radius scale shadcn (--radius base 0.625rem = 10px) — usato dai componenti shadcn */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 2px);
+  --radius-2xl: calc(var(--radius) + 6px);
+}
+
+:root {
+  --radius: 0.625rem;
+
+  /* M3 palette — light theme */
+  --background: #fdf8fd;
+  --foreground: #1c1b1f;
+
+  /* shadcn token surfaces → M3 mappa */
+  --card: #ffffff;
+  --card-foreground: #1c1b1f;
+  --popover: #ffffff;
+  --popover-foreground: #1c1b1f;
+  --primary: #000000;
+  --primary-foreground: #ffffff;
+  --secondary: #5f5c73;
+  --secondary-foreground: #ffffff;
+  --muted: #f1ecf2;
+  --muted-foreground: #48454f;
+  --accent: #e5dffb;
+  --accent-foreground: #1b1345;
+  --destructive: #ba1a1a;
+  --destructive-foreground: #ffffff;
+  --border: #c9c5d0;
+  --input: #e6e1e6;
+  --ring: #5f588d;
+
+  /* Charts (M3 expressive set) */
+  --chart-1: #1b1345;
+  --chart-2: #5f588d;
+  --chart-3: #c9bffc;
+  --chart-4: #5f5c73;
+  --chart-5: #f8b7a2;
+
+  /* Sidebar (lato freelance) */
+  --sidebar: #f7f2f8;
+  --sidebar-foreground: #1c1b1f;
+  --sidebar-primary: #000000;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e5dffb;
+  --sidebar-accent-foreground: #1b1345;
+  --sidebar-border: #c9c5d0;
+  --sidebar-ring: #5f588d;
+
+  /* M3 surface scale */
+  --surface: #fdf8fd;
+  --on-surface: #1c1b1f;
+  --on-surface-variant: #48454f;
+  --surface-variant: #e6e1e6;
+  --surface-bright: #fdf8fd;
+  --surface-dim: #ddd8de;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f7f2f8;
+  --surface-container: #f1ecf2;
+  --surface-container-high: #ece7ec;
+  --surface-container-highest: #e6e1e6;
+
+  /* M3 container/fixed/outline/inverse */
+  --primary-container: #1b1345;
+  --on-primary-container: #857db5;
+  --secondary-container: #e5dffb;
+  --on-secondary-container: #656279;
+  --tertiary: #000000;
+  --on-tertiary: #ffffff;
+  --tertiary-container: #331105;
+  --on-tertiary-container: #ae7663;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
+  --outline: #797580;
+  --outline-variant: #c9c5d0;
+  --inverse-surface: #313034;
+  --inverse-on-surface: #f4eff5;
+  --inverse-primary: #c9bffc;
+}
+
+.dark {
+  /* Dark mode opzionale, non usato in MVP. Tokens per compatibilità futura. */
+  --background: #141218;
+  --foreground: #e6e1e6;
+  --card: #1c1b1f;
+  --card-foreground: #e6e1e6;
+  --popover: #1c1b1f;
+  --popover-foreground: #e6e1e6;
+  --primary: #c9bffc;
+  --primary-foreground: #1b1345;
+  --secondary: #c9c3de;
+  --secondary-foreground: #1c192d;
+  --muted: #2d2c30;
+  --muted-foreground: #c9c5d0;
+  --accent: #474073;
+  --accent-foreground: #e5deff;
+  --destructive: #ffb4ab;
+  --destructive-foreground: #690005;
+  --border: #48454f;
+  --input: #313034;
+  --ring: #c9bffc;
+  --chart-1: #c9bffc;
+  --chart-2: #857db5;
+  --chart-3: #f8b7a2;
+  --chart-4: #c9c3de;
+  --chart-5: #5f5c73;
+  --sidebar: #1c1b1f;
+  --sidebar-foreground: #e6e1e6;
+  --sidebar-primary: #c9bffc;
+  --sidebar-primary-foreground: #1b1345;
+  --sidebar-accent: #474073;
+  --sidebar-accent-foreground: #e5deff;
+  --sidebar-border: #48454f;
+  --sidebar-ring: #c9bffc;
+  --surface: #141218;
+  --on-surface: #e6e1e6;
+  --on-surface-variant: #c9c5d0;
+  --surface-variant: #48454f;
+  --surface-bright: #3a383d;
+  --surface-dim: #141218;
+  --surface-container-lowest: #0e0d12;
+  --surface-container-low: #1c1b1f;
+  --surface-container: #201f23;
+  --surface-container-high: #2b292d;
+  --surface-container-highest: #363438;
+  --primary-container: #474073;
+  --on-primary-container: #e5deff;
+  --secondary-container: #47445a;
+  --on-secondary-container: #e5dffb;
+  --tertiary: #f8b7a2;
+  --on-tertiary: #4f1e0d;
+  --tertiary-container: #683b2b;
+  --on-tertiary-container: #ffdbcf;
+  --error-container: #93000a;
+  --on-error-container: #ffdad6;
+  --outline: #948f99;
+  --outline-variant: #48454f;
+  --inverse-surface: #e6e1e6;
+  --inverse-on-surface: #313034;
+  --inverse-primary: #5f588d;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans antialiased;
+    font-feature-settings: "cv11", "ss01", "ss03";
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-variant-numeric: tabular-nums;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+  /* Numeri (importi, date, contatori) sempre tabular-nums */
+  .num-tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}

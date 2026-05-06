@@ -1,0 +1,11 @@
+.next
+node_modules
+build
+out
+public
+*.min.js
+*.min.css
+package-lock.json
+src/types/database.types.ts
+supabase/.temp
+supabase/migrations/*.sql

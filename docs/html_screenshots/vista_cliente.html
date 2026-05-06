@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html class="light" lang="it"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Workspace Cliente - Cristian Costache</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Newsreader:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#000000",
+                    "on-surface-variant": "#48454f",
+                    "on-tertiary-fixed-variant": "#683b2b",
+                    "on-error-container": "#93000a",
+                    "on-error": "#ffffff",
+                    "primary": "#000000",
+                    "outline": "#797580",
+                    "on-surface": "#1c1b1f",
+                    "tertiary-container": "#331105",
+                    "on-tertiary-container": "#ae7663",
+                    "inverse-on-surface": "#f4eff5",
+                    "surface-container": "#f1ecf2",
+                    "primary-container": "#1b1345",
+                    "tertiary-fixed-dim": "#f8b7a2",
+                    "tertiary-fixed": "#ffdbcf",
+                    "surface": "#fdf8fd",
+                    "outline-variant": "#c9c5d0",
+                    "surface-container-low": "#f7f2f8",
+                    "secondary": "#5f5c73",
+                    "on-primary-fixed": "#1b1345",
+                    "on-secondary-fixed-variant": "#47445a",
+                    "on-secondary-fixed": "#1c192d",
+                    "secondary-container": "#e5dffb",
+                    "inverse-surface": "#313034",
+                    "surface-bright": "#fdf8fd",
+                    "error-container": "#ffdad6",
+                    "on-secondary-container": "#656279",
+                    "surface-container-high": "#ece7ec",
+                    "on-background": "#1c1b1f",
+                    "surface-container-highest": "#e6e1e6",
+                    "surface-tint": "#5f588d",
+                    "on-secondary": "#ffffff",
+                    "surface-dim": "#ddd8de",
+                    "secondary-fixed-dim": "#c9c3de",
+                    "secondary-fixed": "#e5dffb",
+                    "on-tertiary": "#ffffff",
+                    "surface-variant": "#e6e1e6",
+                    "on-primary": "#ffffff",
+                    "primary-fixed-dim": "#c9bffc",
+                    "on-primary-container": "#857db5",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed": "#e5deff",
+                    "on-tertiary-fixed": "#331105",
+                    "background": "#fdf8fd",
+                    "on-primary-fixed-variant": "#474073",
+                    "inverse-primary": "#c9bffc",
+                    "error": "#ba1a1a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "24px",
+                    "container-padding": "40px",
+                    "section-gap": "32px",
+                    "element-gap": "24px"
+            },
+            "fontFamily": {
+                    "h3": ["Newsreader"],
+                    "body-lg": ["Inter"],
+                    "h2": ["Newsreader"],
+                    "body-md": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "h1": ["Newsreader"],
+                    "numeric-data": ["Inter"],
+                    "body-sm": ["Inter"]
+            },
+            "fontSize": {
+                    "h3": ["24px", {"lineHeight": "1.3", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "h2": ["32px", {"lineHeight": "1.25", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "h1": ["40px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "numeric-data": ["16px", {"fontWeight": "500"}],
+                    "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .custom-burgundy { color: #5C2E2E; }
+        .custom-burgundy-bg { background-color: #5C2E2E; }
+        .custom-burgundy-border { border-color: #5C2E2E; }
+        .bg-warm-cream { background-color: #FAF7F2; }
+    </style>
+</head>
+<body class="bg-warm-cream text-on-background font-body-md text-body-md min-h-screen flex flex-col">
+<!-- TopNavBar (Shared Component) -->
+<nav class="bg-surface shadow-[0_4px_20px_0_rgba(28,27,31,0.05)] w-full">
+<div class="flex justify-between items-center w-full px-container-padding max-w-[1280px] mx-auto py-4 h-20">
+<!-- Brand / Avatar -->
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full custom-burgundy-bg flex items-center justify-center text-white font-h3">
+                    CC
+                </div>
+<div>
+<h1 class="font-h3 text-h3 text-primary tracking-tight">Cristian Costache</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Web Developer · Roma</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<ul class="hidden md:flex gap-8 items-center h-full">
+<li class="h-full flex items-center">
+<a class="text-primary font-bold border-b-2 border-primary pb-1 h-full flex items-center hover:bg-surface-container-low transition-all duration-200" href="#">Panoramica</a>
+</li>
+<li class="h-full flex items-center">
+<a class="text-on-surface-variant hover:text-primary transition-colors h-full flex items-center hover:bg-surface-container-low duration-200" href="#">Progetti</a>
+</li>
+<li class="h-full flex items-center">
+<a class="text-on-surface-variant hover:text-primary transition-colors h-full flex items-center hover:bg-surface-container-low duration-200" href="#">File</a>
+</li>
+<li class="h-full flex items-center">
+<a class="text-on-surface-variant hover:text-primary transition-colors h-full flex items-center hover:bg-surface-container-low duration-200" href="#">Messaggi</a>
+</li>
+<li class="h-full flex items-center">
+<a class="text-on-surface-variant hover:text-primary transition-colors h-full flex items-center hover:bg-surface-container-low duration-200" href="#">Fatture</a>
+</li>
+</ul>
+<!-- Client Avatar / Right Actions -->
+<div class="flex items-center gap-4">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Marco Rossi</span>
+<img alt="Avatar Marco Rossi" class="w-10 h-10 rounded-full object-cover border border-outline-variant/30" data-alt="A professional headshot of a smiling man in his 30s wearing a smart casual shirt, representing a client profile avatar. Bright and friendly expression, natural lighting. The image fits perfectly within a clean, modern SaaS user interface with a light-mode aesthetic and cool-neutral tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnxJ7CboNVN8ckXMRpUQMW_yvM4wQ8gvMtw8hyg7KuLr-bm2jW6fGeaRBTers63pPsf9SXZ97CI6X9ZcfFND24I_kRJJBzehXZbaua9uyW3rLD1zrWQwrwtSEf8_QJ_JYvhEfVbsU31f4HV3yVRGCz6ptaut8LlFLIAxklEu5sp4LB3OvEhMldlqR7NCcQ_uRaC_tJz-9Sn3ChXnw4OXCkf0ZeM93kIKSTQqXb5YvBHtcybtb2gKoTXn3NSVsW7tFg5GYM6HGe3t8"/>
+</div>
+</div>
+</nav>
+<!-- Main Workspace -->
+<main class="flex-grow w-full max-w-[1280px] mx-auto px-container-padding py-section-gap flex flex-col gap-section-gap">
+<!-- Hero Section -->
+<section class="flex flex-col gap-4">
+<span class="font-label-caps text-label-caps custom-burgundy tracking-widest uppercase">BENTORNATO</span>
+<h1 class="font-h1 text-h1 text-primary">Ciao Marco, ecco a che punto siamo</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Ultimo aggiornamento da Cristian: ieri pomeriggio</p>
+</section>
+<!-- Two Column Layout -->
+<div class="flex flex-col lg:flex-row gap-gutter w-full">
+<!-- Left Column (60%) -->
+<div class="w-full lg:w-[60%] flex flex-col gap-element-gap">
+<h2 class="font-h2 text-h2 text-primary">I tuoi progetti</h2>
+<!-- Project Card 1 -->
+<div class="bg-surface rounded-[16px] shadow-[0_12px_24px_-4px_rgba(28,27,31,0.08)] p-8 border border-outline-variant/20 flex flex-col gap-6">
+<div class="flex justify-between items-start">
+<h3 class="font-h3 text-h3 text-primary">Sito vetrina ristorante</h3>
+<span class="bg-secondary-fixed text-on-secondary-fixed px-3 py-1 rounded-full font-label-caps text-label-caps">IN CORSO</span>
+</div>
+<!-- Progress Bar -->
+<div class="flex flex-col gap-2">
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden flex">
+<div class="bg-primary-container w-[75%] h-full"></div>
+</div>
+<div class="flex justify-between font-body-sm text-body-sm text-on-surface-variant">
+<span class="text-primary-container font-medium">Mockup ✓</span>
+<span class="text-primary-container font-medium">Sviluppo ✓</span>
+<span class="custom-burgundy font-medium">Contenuti (in corso)</span>
+<span>Deploy</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                        Stiamo finalizzando i contenuti del menù. Cristian sta aspettando le tue 3 foto della galleria — le hai già?
+                    </p>
+<div class="pt-4 border-t border-outline-variant/30 flex justify-end">
+<button class="px-6 py-2 border custom-burgundy-border custom-burgundy font-body-md text-body-md rounded hover:bg-[#5C2E2E]/5 transition-colors">Carica foto</button>
+</div>
+</div>
+<!-- Project Card 2 -->
+<div class="bg-surface rounded-[16px] shadow-[0_12px_24px_-4px_rgba(28,27,31,0.08)] p-8 border border-outline-variant/20 flex flex-col gap-6">
+<div class="flex justify-between items-start">
+<h3 class="font-h3 text-h3 text-primary">Gestione social mensile</h3>
+<span class="bg-surface-tint/10 text-surface-tint px-3 py-1 rounded-full font-label-caps text-label-caps">ATTIVO</span>
+</div>
+<!-- Progress Strip -->
+<div class="flex gap-1 h-3 rounded-full overflow-hidden w-full bg-surface-container">
+<div class="flex-1 custom-burgundy-bg"></div>
+<div class="flex-1 custom-burgundy-bg border-l border-white/20"></div>
+<div class="flex-1 custom-burgundy-bg border-l border-white/20"></div>
+<div class="flex-1 custom-burgundy-bg border-l border-white/20"></div>
+<div class="flex-1 border-l border-white/20"></div>
+<div class="flex-1 border-l border-white/20"></div>
+<div class="flex-1 border-l border-white/20"></div>
+<div class="flex-1 border-l border-white/20"></div>
+<div class="flex-1 border-l border-white/20"></div>
+<div class="flex-1 border-l border-white/20"></div>
+<div class="flex-1 border-l border-white/20"></div>
+<div class="flex-1 border-l border-white/20"></div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                        Tutto regolare. Il prossimo report mensile sarà pronto il 5 maggio.
+                    </p>
+</div>
+<!-- Action Items Section -->
+<div class="mt-4 flex flex-col gap-4">
+<h3 class="font-h3 text-h3 text-primary border-b border-outline-variant/30 pb-2">Cosa serve da te</h3>
+<ul class="flex flex-col gap-3">
+<li class="flex items-center gap-3 bg-surface p-4 rounded-[8px] border border-outline-variant/30 hover:border-outline-variant transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-outline">radio_button_unchecked</span>
+<span class="font-body-md text-body-md text-on-surface">Carica 3 foto galleria del ristorante</span>
+</li>
+<li class="flex items-center gap-3 bg-surface p-4 rounded-[8px] border border-outline-variant/30 hover:border-outline-variant transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-outline">radio_button_unchecked</span>
+<span class="font-body-md text-body-md text-on-surface">Approva la milestone 'Sviluppo frontend'</span>
+</li>
+</ul>
+</div>
+</div>
+<!-- Right Column (40%) -->
+<div class="w-full lg:w-[40%] flex flex-col gap-element-gap mt-12 lg:mt-0">
+<!-- Riepilogo Card -->
+<div class="bg-surface rounded-[16px] shadow-[0_12px_24px_-4px_rgba(28,27,31,0.08)] p-6 border border-outline-variant/20 flex flex-col gap-4">
+<h3 class="font-h3 text-h3 text-primary mb-2">Riepilogo</h3>
+<div class="flex items-center justify-between font-body-md text-body-md">
+<span class="text-on-surface-variant">Progetti attivi</span>
+<span class="font-numeric-data text-numeric-data">2</span>
+</div>
+<div class="flex items-center justify-between font-body-md text-body-md">
+<span class="text-on-surface-variant">Fatture in attesa</span>
+<span class="font-numeric-data text-numeric-data custom-burgundy">1</span>
+</div>
+<div class="flex items-center justify-between font-body-md text-body-md">
+<span class="text-on-surface-variant">Messaggi non letti</span>
+<span class="font-numeric-data text-numeric-data">2</span>
+</div>
+</div>
+<!-- Ultima Fattura Card -->
+<div class="bg-surface rounded-[16px] shadow-[0_12px_24px_-4px_rgba(28,27,31,0.08)] p-6 border border-outline-variant/20 flex flex-col gap-6 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-16 h-16 bg-error-container/20 rounded-bl-[100%]"></div>
+<div class="flex justify-between items-start z-10">
+<div>
+<h3 class="font-h3 text-h3 text-primary">Fattura n.47</h3>
+<p class="font-numeric-data text-numeric-data text-on-surface-variant mt-1">€ 1.400,00</p>
+</div>
+<span class="bg-error-container text-on-error-container px-2 py-1 rounded text-[10px] font-bold tracking-wide">DA SALDARE</span>
+</div>
+<div class="flex flex-col gap-3 z-10 pt-2">
+<button class="w-full custom-burgundy-bg text-white font-body-md text-body-md py-3 rounded hover:bg-[#4a2525] transition-colors text-center">Paga con carta</button>
+<button class="w-full bg-transparent border border-outline-variant text-on-surface-variant font-body-md text-body-md py-3 rounded hover:bg-surface-container-low transition-colors text-center">Bonifico</button>
+</div>
+</div>
+<!-- Messaggi Recenti Card -->
+<div class="bg-surface rounded-[16px] shadow-[0_12px_24px_-4px_rgba(28,27,31,0.08)] p-6 border border-outline-variant/20 flex flex-col gap-5">
+<h3 class="font-h3 text-h3 text-primary">Messaggi recenti</h3>
+<div class="flex flex-col gap-4">
+<div class="flex gap-3 items-start bg-surface-container-low p-3 rounded-[8px]">
+<div class="w-8 h-8 rounded-full custom-burgundy-bg flex-shrink-0 flex items-center justify-center text-white text-[12px]">CC</div>
+<div>
+<p class="font-body-sm text-body-sm text-on-surface">Ciao Marco, ti ho caricato i nuovi mockup per la homepage. Fammi sapere cosa ne pensi!</p>
+<span class="font-label-caps text-label-caps text-on-surface-variant/70 mt-1 block">IERI, 15:30</span>
+</div>
+</div>
+</div>
+<button class="text-primary-container font-body-md text-body-md text-left hover:underline w-fit">Apri conversazione →</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer (Shared Component) -->
+<footer class="w-full py-section-gap px-container-padding flex flex-col md:flex-row justify-between items-center gap-element-gap bg-surface-container-low border-t border-outline-variant/30 mt-auto">
+<p class="font-body-sm text-body-sm text-on-surface-variant">Workspace gestito con [NOME_APP]</p>
+<ul class="flex gap-6">
+<li><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Aiuto</a></li>
+<li><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a></li>
+<li><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Termini</a></li>
+</ul>
+</footer>
+</body></html>

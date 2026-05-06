@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+
+<html lang="it"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard Fatture - Freelance Workspace</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Newsreader:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#000000",
+                    "on-secondary-fixed": "#1c192d",
+                    "surface-container-highest": "#e6e1e6",
+                    "outline": "#797580",
+                    "on-primary-container": "#857db5",
+                    "tertiary-fixed": "#ffdbcf",
+                    "primary-container": "#1b1345",
+                    "surface": "#fdf8fd",
+                    "on-tertiary-fixed-variant": "#683b2b",
+                    "secondary": "#5f5c73",
+                    "inverse-on-surface": "#f4eff5",
+                    "secondary-container": "#e5dffb",
+                    "tertiary-container": "#331105",
+                    "surface-container-low": "#f7f2f8",
+                    "primary-fixed-dim": "#c9bffc",
+                    "surface-tint": "#5f588d",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#ddd8de",
+                    "secondary-fixed-dim": "#c9c3de",
+                    "inverse-surface": "#313034",
+                    "surface-container-lowest": "#ffffff",
+                    "on-error": "#ffffff",
+                    "on-tertiary-fixed": "#331105",
+                    "on-secondary": "#ffffff",
+                    "outline-variant": "#c9c5d0",
+                    "on-tertiary-container": "#ae7663",
+                    "on-background": "#1c1b1f",
+                    "surface-bright": "#fdf8fd",
+                    "secondary-fixed": "#e5dffb",
+                    "on-primary-fixed-variant": "#474073",
+                    "surface-container-high": "#ece7ec",
+                    "surface-container": "#f1ecf2",
+                    "on-primary-fixed": "#1b1345",
+                    "on-secondary-fixed-variant": "#47445a",
+                    "inverse-primary": "#c9bffc",
+                    "background": "#fdf8fd",
+                    "error-container": "#ffdad6",
+                    "on-surface": "#1c1b1f",
+                    "on-tertiary": "#ffffff",
+                    "tertiary": "#000000",
+                    "on-secondary-container": "#656279",
+                    "on-primary": "#ffffff",
+                    "surface-variant": "#e6e1e6",
+                    "primary-fixed": "#e5deff",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed-dim": "#f8b7a2",
+                    "on-surface-variant": "#48454f"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "32px",
+                    "gutter": "24px",
+                    "element-gap": "24px",
+                    "container-padding": "40px"
+            },
+            "fontFamily": {
+                    "h1": ["Newsreader"],
+                    "body-lg": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "h3": ["Newsreader"],
+                    "body-sm": ["Inter"],
+                    "h2": ["Newsreader"],
+                    "body-md": ["Inter"],
+                    "numeric-data": ["Inter"]
+            },
+            "fontSize": {
+                    "h1": ["40px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "h3": ["24px", {"lineHeight": "1.3", "fontWeight": "500"}],
+                    "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "h2": ["32px", {"lineHeight": "1.25", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "numeric-data": ["16px", {"fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .shadow-level-2 {
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.05), 0 0 10px 0 rgba(0,0,0,0.02);
+        }
+    </style>
+</head>
+<body class="bg-surface-container-low font-body-md text-on-surface flex min-h-screen">
+<!-- SideNavBar (Shared Component) -->
+<nav class="hidden md:flex flex-col w-[240px] h-screen sticky left-0 top-0 bg-surface-container-low dark:bg-surface-dim py-spacing-container-padding border-r border-outline-variant/30">
+<div class="px-gutter mb-12">
+<h2 class="font-h2 text-h2 text-primary dark:text-primary-fixed tracking-tight">[NOME_APP]</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Freelance Workspace</p>
+</div>
+<div class="flex-grow flex flex-col gap-1">
+<a class="flex items-center gap-3 px-gutter py-3 text-on-surface-variant font-body-md hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-colors duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-gutter py-3 border-l-4 border-primary text-primary font-body-md font-bold bg-surface-container dark:bg-surface-container-high cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+                Fatture
+            </a>
+<a class="flex items-center gap-3 px-gutter py-3 text-on-surface-variant font-body-md hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-colors duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined">settings</span>
+                Impostazioni
+            </a>
+<a class="flex items-center gap-3 px-gutter py-3 text-on-surface-variant font-body-md hover:bg-surface-container-highest dark:hover:bg-surface-variant transition-colors duration-200 cursor-pointer active:scale-95" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+                Piano
+            </a>
+</div>
+<div class="px-gutter mt-auto flex flex-col gap-1">
+<button class="w-full flex justify-center items-center gap-2 py-3 bg-primary text-on-primary rounded-lg font-body-md hover:opacity-90 transition-opacity mb-6">
+<span class="material-symbols-outlined">add</span>
+                Nuova Fattura
+            </button>
+<a class="flex items-center gap-3 py-2 text-on-surface-variant font-body-sm hover:text-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">help_outline</span>
+                Supporto
+            </a>
+<a class="flex items-center gap-3 py-2 text-on-surface-variant font-body-sm hover:text-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+                Esci
+            </a>
+<div class="mt-6 flex items-center gap-3 pt-4 border-t border-outline-variant/50">
+<img alt="User profile picture" class="w-8 h-8 rounded-full object-cover" data-alt="A professional headshot of a young woman with a warm smile, wearing a dark blazer over a white shirt. The lighting is soft and natural, suggesting an airy, modern office environment. The background is slightly blurred with light cool tones, perfectly matching the minimalist editorial UI style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSNOck12dT33zAHJl7-ff0Xylt84YGslSAXOZbf3L746C6_C-mQCpSgbhzl1uaUDB3-XSSpTXOCEQOTCz7G5qvjlFu6g_seDHjPn7rBhDkbIvztEMWFngYnjGLM4xG93_uYhQgS5ps8XKkPgRs3tASxd1-hYwydGkWUp6JwSeSahkKVXnIkdYS1rgWT_G6HeZOG3ayNQCr9iFdBR_THcc0Ds0xW8I8riWEk-IBAdlehnuJOdT4_bNVvzvs1CMEposMFnjm5v65Uww"/>
+<div class="flex flex-col">
+<span class="font-body-sm font-medium">Giulia R.</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">PRO</span>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-grow flex flex-col w-full max-w-[1280px] mx-auto min-h-screen">
+<!-- TopAppBar / Header Section -->
+<header class="flex justify-between items-center w-full px-gutter py-8">
+<h1 class="font-h1 text-h1 text-primary">Fatture</h1>
+<div class="flex items-center gap-4">
+<button class="px-4 py-2 border border-outline text-on-surface rounded-DEFAULT font-body-sm font-medium hover:bg-surface-variant transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                    Esporta CSV
+                </button>
+<button class="px-6 py-2 bg-primary text-on-primary rounded-DEFAULT font-body-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    Nuova fattura
+                </button>
+</div>
+</header>
+<div class="px-gutter pb-section-gap flex flex-col gap-element-gap">
+<!-- Cash Flow Section -->
+<section class="bg-surface-container-lowest rounded-xl shadow-level-2 p-8">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+<!-- Stat 1 -->
+<div class="flex flex-col gap-2 relative">
+<span class="font-body-sm text-on-surface-variant">Incassato questo mese</span>
+<div class="flex items-baseline gap-3">
+<span class="font-h2 text-h2 text-primary">€ 7.200</span>
+<span class="font-body-sm text-[#4A7c59] bg-[#4A7c59]/10 px-2 py-0.5 rounded-DEFAULT font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                                +18%
+                            </span>
+</div>
+</div>
+<!-- Stat 2 -->
+<div class="flex flex-col gap-2 md:border-l border-outline-variant/30 md:pl-8">
+<span class="font-body-sm text-on-surface-variant">In attesa di pagamento</span>
+<span class="font-h2 text-h2 text-primary">€ 4.850</span>
+</div>
+<!-- Stat 3 -->
+<div class="flex flex-col gap-2 md:border-l border-outline-variant/30 md:pl-8">
+<span class="font-body-sm text-on-surface-variant">Scadute</span>
+<span class="font-h2 text-h2 text-error">€ 1.400</span>
+</div>
+<!-- Stat 4 -->
+<div class="flex flex-col gap-2 md:border-l border-outline-variant/30 md:pl-8">
+<span class="font-body-sm text-on-surface-variant">Bozze</span>
+<span class="font-h2 text-h2 text-on-surface-variant/70">€ 2.100</span>
+</div>
+</div>
+<!-- Abstract Chart representation -->
+<div class="mt-8 pt-8 border-t border-outline-variant/30 h-48 relative w-full overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-t from-surface-variant/30 to-transparent"></div>
+<div class="flex justify-between items-end h-full w-full px-4 pb-6 absolute">
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-full flex items-end justify-around h-32 opacity-80">
+<!-- Chart Bars -->
+<div class="w-4 bg-primary/20 h-16 rounded-t-sm relative"><div class="absolute bottom-0 w-full bg-primary h-8 rounded-t-sm"></div></div>
+<div class="w-4 bg-primary/20 h-24 rounded-t-sm relative"><div class="absolute bottom-0 w-full bg-primary h-12 rounded-t-sm"></div></div>
+<div class="w-4 bg-primary/20 h-20 rounded-t-sm relative"><div class="absolute bottom-0 w-full bg-primary h-16 rounded-t-sm"></div></div>
+<div class="w-4 bg-primary/20 h-32 rounded-t-sm relative"><div class="absolute bottom-0 w-full bg-primary h-24 rounded-t-sm"></div></div>
+<div class="w-4 bg-primary/20 h-28 rounded-t-sm relative"><div class="absolute bottom-0 w-full bg-primary h-20 rounded-t-sm"></div></div>
+<div class="w-4 bg-primary/20 h-16 rounded-t-sm relative"><div class="absolute bottom-0 w-full bg-[#4A7c59] h-2 rounded-t-sm"></div></div>
+</div>
+<div class="w-full flex justify-around font-label-caps text-label-caps text-on-surface-variant/60">
+<span>GEN</span><span>FEB</span><span>MAR</span><span>APR</span><span>MAG</span><span>GIU</span>
+</div>
+</div>
+</div>
+<div class="absolute top-4 right-4 flex gap-4 font-label-caps text-label-caps">
+<span class="flex items-center gap-1 text-on-surface-variant"><div class="w-2 h-2 rounded-full bg-primary/20"></div> Fatturato</span>
+<span class="flex items-center gap-1 text-primary"><div class="w-2 h-2 rounded-full bg-primary"></div> Incassato</span>
+</div>
+</div>
+</section>
+<!-- Table Filters -->
+<div class="flex justify-between items-center w-full mt-4">
+<div class="flex gap-2">
+<button class="px-4 py-1.5 bg-primary text-on-primary rounded-full font-body-sm font-medium">Tutte</button>
+<button class="px-4 py-1.5 bg-surface-container hover:bg-surface-variant text-on-surface-variant rounded-full font-body-sm transition-colors">Bozze</button>
+<button class="px-4 py-1.5 bg-surface-container hover:bg-surface-variant text-on-surface-variant rounded-full font-body-sm transition-colors">Inviate</button>
+<button class="px-4 py-1.5 bg-surface-container hover:bg-surface-variant text-on-surface-variant rounded-full font-body-sm transition-colors">Pagate</button>
+<button class="px-4 py-1.5 bg-surface-container hover:bg-surface-variant text-error rounded-full font-body-sm transition-colors">Scadute</button>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container border-none rounded-DEFAULT font-body-sm focus:ring-1 focus:ring-primary w-64 text-on-surface placeholder:text-on-surface-variant/60" placeholder="Cerca fattura, cliente..." type="text"/>
+</div>
+</div>
+<!-- Invoice Table -->
+<section class="bg-surface-container-lowest rounded-xl shadow-level-2 overflow-hidden">
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant/30 text-on-surface-variant font-label-caps text-label-caps tracking-wider">
+<th class="py-4 px-6 font-medium">N°</th>
+<th class="py-4 px-6 font-medium">Cliente</th>
+<th class="py-4 px-6 font-medium">Progetto</th>
+<th class="py-4 px-6 font-medium">Emessa</th>
+<th class="py-4 px-6 font-medium">Scadenza</th>
+<th class="py-4 px-6 font-medium text-right">Importo</th>
+<th class="py-4 px-6 font-medium">Stato</th>
+<th class="py-4 px-6 font-medium text-right"></th>
+</tr>
+</thead>
+<tbody class="font-body-sm text-on-surface divide-y divide-outline-variant/20">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors group cursor-pointer">
+<td class="py-4 px-6 font-numeric-data text-on-surface-variant">#48</td>
+<td class="py-4 px-6 flex items-center gap-3">
+<div class="w-8 h-8 rounded-DEFAULT bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-xs">SB</div>
+<span class="font-medium">Studio Bianchi Architetti</span>
+</td>
+<td class="py-4 px-6 text-on-surface-variant">Restyling Sito Web</td>
+<td class="py-4 px-6 text-on-surface-variant">12 Giu 2024</td>
+<td class="py-4 px-6 text-on-surface-variant">12 Lug 2024</td>
+<td class="py-4 px-6 font-numeric-data text-right">€ 2.400,00</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-surface-container-highest text-on-surface-variant">
+                                        Inviata
+                                    </span>
+</td>
+<td class="py-4 px-6 text-right text-on-surface-variant/0 group-hover:text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low transition-colors group cursor-pointer">
+<td class="py-4 px-6 font-numeric-data text-on-surface-variant">#47</td>
+<td class="py-4 px-6 flex items-center gap-3">
+<div class="w-8 h-8 rounded-DEFAULT bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-xs">PR</div>
+<span class="font-medium">Pasticceria Rossi</span>
+</td>
+<td class="py-4 px-6 text-on-surface-variant">Brand Identity</td>
+<td class="py-4 px-6 text-on-surface-variant">05 Giu 2024</td>
+<td class="py-4 px-6 text-on-surface-variant">05 Lug 2024</td>
+<td class="py-4 px-6 font-numeric-data text-right">€ 850,00</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-surface-container-highest text-on-surface-variant">
+                                        Inviata
+                                    </span>
+</td>
+<td class="py-4 px-6 text-right text-on-surface-variant/0 group-hover:text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low transition-colors group cursor-pointer bg-error-container/10">
+<td class="py-4 px-6 font-numeric-data text-on-surface-variant">#42</td>
+<td class="py-4 px-6 flex items-center gap-3">
+<img alt="ZenoDigital Logo" class="w-8 h-8 rounded-DEFAULT object-cover border border-outline-variant/30" data-alt="A clean, abstract architectural or modern office detail. The image features a minimalist concrete wall with a subtle shadow play from natural light. The tones are neutral grays and soft whites, matching the professional, understated aesthetic of the UI." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDnAu9EuvvYlw0nJsoztD6sW2OMtJqKhSSH6NlxrvyzjKSLA_KIersCwjgh597kpeDp34JQ3BMiXAe4pAQjVhPcIKGDy9vejQmK2C-JLJ1Re86pfsC3XUfrWp0wBWTGshGSlefMh2PE1n-CWFwRt0ifoSq4V1IMJGrHg9-gZBUJFxrZHpo_RF7lBK6timJGBY-p3nYqIjuFhz6piTa5JJlobAIP785cgc0xSGMf0PYjuHWZSXEwZXgaQ4qeGVnhvxR0xEM8AbPhvWI"/>
+<span class="font-medium">ZenoDigital SRL</span>
+</td>
+<td class="py-4 px-6 text-on-surface-variant">Consulenza SEO Q2</td>
+<td class="py-4 px-6 text-on-surface-variant">20 Apr 2024</td>
+<td class="py-4 px-6 text-error">20 Mag 2024</td>
+<td class="py-4 px-6 font-numeric-data text-right">€ 1.400,00</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-error-container text-on-error-container">
+                                        Scaduta (18gg)
+                                    </span>
+</td>
+<td class="py-4 px-6 text-right text-on-surface-variant/0 group-hover:text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low transition-colors group cursor-pointer">
+<td class="py-4 px-6 font-numeric-data text-on-surface-variant">#46</td>
+<td class="py-4 px-6 flex items-center gap-3">
+<div class="w-8 h-8 rounded-DEFAULT bg-surface-variant text-on-surface-variant flex items-center justify-center font-bold text-xs">VC</div>
+<span class="font-medium">Verdi Consulting</span>
+</td>
+<td class="py-4 px-6 text-on-surface-variant">Shooting Fotografico</td>
+<td class="py-4 px-6 text-on-surface-variant">01 Giu 2024</td>
+<td class="py-4 px-6 text-on-surface-variant">01 Lug 2024</td>
+<td class="py-4 px-6 font-numeric-data text-right">€ 1.200,00</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[#4A7c59]/10 text-[#4A7c59]">
+                                        Pagata
+                                    </span>
+</td>
+<td class="py-4 px-6 text-right text-on-surface-variant/0 group-hover:text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container-low transition-colors group cursor-pointer opacity-70">
+<td class="py-4 px-6 font-numeric-data text-on-surface-variant">-</td>
+<td class="py-4 px-6 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-dim text-on-surface-variant flex items-center justify-center font-bold text-xs">MF</div>
+<span class="font-medium">Marco Ferrari</span>
+</td>
+<td class="py-4 px-6 text-on-surface-variant italic">Nessun progetto...</td>
+<td class="py-4 px-6 text-on-surface-variant">-</td>
+<td class="py-4 px-6 text-on-surface-variant">-</td>
+<td class="py-4 px-6 font-numeric-data text-right">€ 450,00</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-2.5 py-1 border border-outline-variant rounded-full text-xs font-medium text-on-surface-variant bg-surface">
+                                        Bozza
+                                    </span>
+</td>
+<td class="py-4 px-6 text-right text-on-surface-variant/0 group-hover:text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</td>
+</tr>
+<!-- Row 6 -->
+<tr class="hover:bg-surface-container-low transition-colors group cursor-pointer bg-error-container/10">
+<td class="py-4 px-6 font-numeric-data text-on-surface-variant">#41</td>
+<td class="py-4 px-6 flex items-center gap-3">
+<div class="w-8 h-8 rounded-DEFAULT bg-tertiary-container text-on-tertiary-container flex items-center justify-center font-bold text-xs">BG</div>
+<span class="font-medium">Bistrot Il Glicine</span>
+</td>
+<td class="py-4 px-6 text-on-surface-variant">Gestione Social Q1</td>
+<td class="py-4 px-6 text-on-surface-variant">10 Apr 2024</td>
+<td class="py-4 px-6 text-error">10 Mag 2024</td>
+<td class="py-4 px-6 font-numeric-data text-right">€ 600,00</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-error-container text-on-error-container">
+                                        Scaduta (28gg)
+                                    </span>
+</td>
+<td class="py-4 px-6 text-right text-on-surface-variant/0 group-hover:text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-outline-variant/30 bg-surface-container-lowest flex justify-center">
+<button class="text-primary font-body-sm font-medium hover:underline">Vedi tutte le fatture</button>
+</div>
+</section>
+<!-- Footer Banner -->
+<div class="mt-8 mb-12 bg-[#E8F0EA] rounded-xl p-6 flex items-center justify-between border border-[#4A7c59]/20 shadow-sm">
+<div class="flex items-start gap-4">
+<div class="p-2 bg-white rounded-DEFAULT text-[#4A7c59] shadow-sm">
+<span class="material-symbols-outlined">sync</span>
+</div>
+<div>
+<h4 class="font-body-md font-medium text-on-surface mb-1">Sincronizza con Pyva</h4>
+<p class="font-body-sm text-on-surface-variant max-w-xl">Collega il tuo conto aziendale per la riconciliazione automatica delle fatture pagate. Risparmia tempo sulla contabilità.</p>
+</div>
+</div>
+<button class="px-4 py-2 bg-white text-primary border border-outline-variant rounded-DEFAULT font-body-sm font-medium hover:bg-surface-variant transition-colors whitespace-nowrap shadow-sm">
+                    Collega ora
+                </button>
+</div>
+</div>
+</main>
+</body></html>
