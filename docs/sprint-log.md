@@ -112,3 +112,129 @@ PRD §Batch A descriveva esplicitamente uno step 3 con primo workspace. Decision
 - ✓ `npm run typecheck` clean
 - ✓ `npm run build` succeed (7 routes, 1 in meno per /onboarding sempre, ma stessa file count visto che era un'unica page)
 - ✓ Flow: signup → step 1 → step 2 → /dashboard (atteso, da validare nel browser dopo restart dev)
+
+---
+
+## Batch B — Workspace core (2026-05-06)
+
+**Obiettivo PRD §Batch B:** dashboard freelance funzionante, vista workspace con tab progetti/file/messaggi, CRUD progetti+milestone con drag-drop, upload file con versioning, chat realtime.
+
+### Cosa è stato costruito
+
+- **Dashboard**:
+  - Layout `(dashboard)/layout.tsx` con sidebar 240px (Server Component) + top bar (Client Component) + drawer mobile.
+  - Sidebar: nav Dashboard / Fatture / Impostazioni / Piano (le ultime 3 in coming-soon), user-card con tier.
+  - Dashboard page con 3 stat card (workspace attivi, fatture in attesa, incassato del mese), filter pills, grid responsive 1→3 colonne di workspace card.
+  - Workspace card con avatar deterministic (colore da hash su client_name), badge tipo, contatori progetti/fatture, barra avanzamento, "Aggiornato N tempo fa".
+  - Dialog "+ Nuovo workspace cliente" con form completo (nome, tipo, email, phone, P.IVA, SDI, indirizzo expandable). Validazione Zod client + server, P.IVA condizionalmente required per company/PA.
+
+- **Vista workspace `/workspace/[id]`**:
+  - Layout `[id]/layout.tsx` con breadcrumb, header (avatar L, anagrafica, badge tipo + P.IVA + email + città), tabs orizzontali, layout 2-col 70/30 con sidebar destra sticky.
+  - Sidebar destra: card "Riepilogo cliente" (progetti totali, fatturato, in attesa, cliente da, tempo medio pagamento) + card "Attività recenti" (10 ultimi eventi da `workspace_activity_log`).
+  - Tabs: Progetti (default), File, Messaggi, Fatture (placeholder), Impostazioni (placeholder).
+
+- **Progetti**:
+  - List page con filter pills (Tutti / Attivi / Completati / Bozze) e contatori.
+  - Project card con badge tipo (lavanda/sky/grigio), status pill, timeline milestone con cerchi (vuoto/mezzo/pieno) per deliverable, timeline mensile per recurring.
+  - Dialog "+ Nuovo progetto" con scelta tipo deliverable/recurring, select template filtrato per verticale del freelance, importi/date.
+  - Project detail page con header card (badge, status, descrizione, stat: importo, avanzamento %, date), milestone list con drag-drop (@dnd-kit/sortable), card "+ Nuova milestone".
+  - Milestone CRUD: status flow todo → in_progress → delivered → approved con timestamp completed_at/approved_at, dropdown menu per cambio stato, delete con conferma, drag-drop reorder con persist immediato.
+
+- **File**:
+  - Bucket `workspace-files` privato (100MB, mime list ampia: immagini, PDF, Office, archivi, video, audio).
+  - Storage RLS policies path `{workspace_id}/{file_id}` con check via `private.is_workspace_member`/`is_workspace_owner`.
+  - Magic-byte verification estesa (PDF, ZIP/Office, 7z, video MP4/MOV/WebM, audio MP3/WAV) + scan binary content sui file dichiarati text-like.
+  - Versioning: stesso (workspace, project, filename) → version = max+1.
+  - File card con icona contestuale (image/pdf/video/audio/archive/generic), badge visibility/progetto, anteprima inline (image + PDF iframe sandbox), download via signed URL 1h, toggle visibility, soft delete.
+  - Drag-drop area + click-to-select.
+
+- **Messaggi**:
+  - Stream chat con bubble allineate (owner = right, blu primary; altri = left, card outline).
+  - Form input textarea con Cmd/Ctrl+Invio, select tag a progetto.
+  - Realtime subscription Supabase su `messages` filtrata per `workspace_id=eq.{id}` (publication aggiornata in migration).
+  - Group by giorno (Oggi / Ieri / data IT).
+
+- **Activity log**:
+  - Tabella `workspace_activity_log` con event_type, entity_type, metadata jsonb. Trigger SECURITY DEFINER su projects/milestones/files/messages, popolano l'event log automaticamente con `auth.uid()` come actor.
+  - SELECT policy: solo membri workspace; INSERT/UPDATE/DELETE non esposti via API (solo i trigger DB scrivono).
+
+### Decisioni rispetto al PRD
+
+- **Member-row dell'owner rimossa dal modello dati**: l'owner è identificato esclusivamente da `client_workspaces.owner_id`. La tabella `workspace_members` resta per i guest invitati via magic link (`role='client'`) — sarà popolata in Batch C. `private.is_workspace_member` già riconosce l'owner via owner_id, quindi nessuna policy è impattata.
+- **`messages.sender_profile_id` aggiunto** (migration `20260506115705_messages_sender_profile.sql`) per supportare messaggi inviati dall'owner senza bisogno di una member-row. Constraint check "exactly one sender column non-null" più policy INSERT updateda per accettare entrambi i path.
+- **Realtime**: messages è in `supabase_realtime` publication; gli altri workspace event sono via SQL polling on-demand (no realtime overhead inutile).
+- **Storage path convention `{workspace_id}/{uuid}`** invece di `{workspace_id}/{project_id}/{filename}` per evitare collisioni e semplificare RLS storage (basta foldername[1] = workspace_id).
+- **Charts in Batch B = NO**: la "barra avanzamento aggregato" è realizzata con CSS flex/width, niente Recharts (Batch D).
+- **Dialog "+ Nuovo workspace" non include la creazione di workspace_members** (vedi punto 1).
+
+### Bug Batch A diagnosticato e fixato
+
+Sintomo: in produzione (provato nell'ex-step-3 onboarding), `INSERT INTO client_workspaces ... RETURNING *` falliva sempre con 42501 mentre l'INSERT bare passava.
+
+Causa REALE (diagnosticata in Batch B, NON race multi-statement come ipotizzato):
+- La SELECT policy `workspaces_select_member` chiama `private.is_workspace_member(id, auth.uid())`, funzione **STABLE**.
+- Dentro `INSERT...RETURNING`, la valutazione della SELECT policy avviene nello stesso statement.
+- La funzione STABLE usa la snapshot dello statement, presa **prima** dell'INSERT — quindi non vede la riga appena inserita per il check `where w.id = workspace_uuid and w.owner_id = user_uuid`.
+- Risultato: `is_workspace_member` ritorna false → SELECT bloccata → 42501 sull'INSERT.
+
+Fix: migration `20260506115034_fix_workspaces_select_returning.sql` riscrive la policy `workspaces_select_member` per valutare `owner_id = auth.uid()` direttamente sulla colonna della NEW row (Postgres lo risolve dal RETURNING) + EXISTS subquery inline su `workspace_members`. Niente più chiamata alla helper STABLE per questo check specifico. Le altre policy che usano `is_workspace_member` (su tabelle figlie) NON hanno il problema perché il workspace già esisteva prima.
+
+Verifica: T10 dello smoke test RLS riproduce il bug (insert+RETURNING) e ora passa.
+
+### Sicurezza & RLS
+
+- ✓ 11/11 RLS smoke test (workspace/profile/project/milestone/file/message/activity isolation; cross-user insert blocked; storage cross-tenant blocked; createWorkspace via RLS funzionante).
+- ✓ Advisor: solo `auth_leaked_password_protection` (toggle dashboard, non in scope codice).
+- ✓ Trigger SECURITY DEFINER tutti con `set search_path = ''` lockato.
+- ✓ Magic-byte check su tutti i file uploaded (no MIME spoofing); rejection di binary content travestito da text/*.
+- ✓ Path convention storage validata da policy (foldername[1] = workspace UUID di cui sei membro/owner).
+- ✓ Signed URL expiry 1h per download/preview.
+- ✓ ZIP family allowed solo se MIME dichiarato corrisponde a una famiglia attesa (Office/zip/x-zip).
+- ✓ MAX_WORKSPACE_FILE_BYTES 100MB enforced client + server + bucket level + DB constraint (500MB hard ceiling).
+- ✓ Tutte le Server Action con logging `console.error("[domain/op]:", error.code, error.message)` su errori Supabase, niente PII loggato.
+
+### Vulnerabilità note (accettate)
+
+- 6 moderate npm audit (postcss < 8.5.10) ereditati da Batch A. Re-check ad ogni upgrade Next.
+
+### Validazione end-to-end
+
+- ✓ `npm run lint` clean
+- ✓ `npm run typecheck` clean (con `noUncheckedIndexedAccess` + `noImplicitReturns`)
+- ✓ `npm run build` succeed: 11 routes (dashboard, workspace/[id], workspace/[id]/files, workspace/[id]/messages, workspace/[id]/projects/[projectId], + le 6 di Batch A)
+- ✓ RLS smoke test 11/11 (workspace + profile + projects + milestones + files + messages + activity_log isolation; cross-user blocks; storage cross-tenant; createWorkspace bug fix verifica)
+- ✓ Supabase advisor: only `auth_leaked_password_protection` warn (atteso)
+- ✓ Realtime publication include `public.messages`
+- ✓ Storage bucket `workspace-files` con file_size_limit + allowed_mime_types corretti
+- ✓ Mobile-first: sidebar 240px collassa in drawer sotto 1024px, sidebar destra workspace stacca sotto 1024px
+
+### Cose lasciate per Batch C+
+
+- Vista cliente `/client/[token]` (Batch C) — il proxy ha già pass-through per `/client/*`.
+- Email notification al cliente per nuovo messaggio (Batch C/F).
+- Stripe billing + tier limits (Batch E) — il subscription_tier in profile è hardcoded `free`.
+- Recharts su dashboard (Batch D).
+- Real fatture page (Batch D) — placeholder tab.
+- Drag-drop file con anteprima multi-file batch (V2).
+- Lettura messaggi cliente + indicatore "letto" reale (Batch C; il `read_at` è già in DB).
+- Calendario ricorrenze per progetti recurring (V2).
+
+### Migrations Batch B
+
+1. `20260506113606_batch_b_workspace_core.sql`: bucket `workspace-files`, storage policy, `workspace_activity_log` + RLS + trigger su projects/milestones/files/messages, indici performance, realtime publication su messages.
+2. `20260506115034_fix_workspaces_select_returning.sql`: fix bug 42501 su INSERT...RETURNING per client_workspaces (vedi sopra).
+3. `20260506115705_messages_sender_profile.sql`: aggiunge `messages.sender_profile_id` + constraint exactly-one + policy INSERT aggiornata per accettare path owner-via-profile.
+
+### Tempo speso
+
+- Pianificazione + diagnosi bug Batch A: ~25 min
+- DB layer (3 migration + advisor + tipi + smoke test esteso): ~50 min
+- Validation schemas + utilities: ~20 min
+- Server Actions (workspaces, projects, milestones, files, messages): ~35 min
+- Dashboard layout + sidebar + dialog + workspace card: ~45 min
+- Workspace layout + header + tabs + right sidebar: ~30 min
+- Project detail + milestone list con drag-drop: ~40 min
+- File upload + storage + preview: ~35 min
+- Chat + Realtime: ~25 min
+- Validation e2e + lint fixes + sprint-log: ~25 min
+- **Totale ~5h30m**

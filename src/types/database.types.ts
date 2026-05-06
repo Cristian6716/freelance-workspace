@@ -235,6 +235,7 @@ export type Database = {
           project_id: string | null
           read_at: string | null
           sender_member_id: string | null
+          sender_profile_id: string | null
           workspace_id: string
         }
         Insert: {
@@ -246,6 +247,7 @@ export type Database = {
           project_id?: string | null
           read_at?: string | null
           sender_member_id?: string | null
+          sender_profile_id?: string | null
           workspace_id: string
         }
         Update: {
@@ -257,6 +259,7 @@ export type Database = {
           project_id?: string | null
           read_at?: string | null
           sender_member_id?: string | null
+          sender_profile_id?: string | null
           workspace_id?: string
         }
         Relationships: [
@@ -279,6 +282,13 @@ export type Database = {
             columns: ["sender_member_id"]
             isOneToOne: false
             referencedRelation: "workspace_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_profile_id_fkey"
+            columns: ["sender_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -515,6 +525,54 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspace_activity_log: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          event_type: string
+          id: string
+          metadata: Json
+          workspace_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          workspace_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_activity_log_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_activity_log_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "client_workspaces"
             referencedColumns: ["id"]
           },
         ]

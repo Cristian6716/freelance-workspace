@@ -1,58 +1,30 @@
 import { Toaster } from "@/components/ui/sonner";
-import { signOutAction } from "@/actions/auth";
+import { DashboardSidebar } from "@/components/app/dashboard-sidebar";
+import { DashboardTopBar } from "@/components/app/dashboard-top-bar";
 import { getCurrentUserAndProfile } from "@/lib/supabase/auth-helpers";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-
-function initialsFor(name?: string | null, email?: string | null) {
-  if (name && name.trim().length > 0) {
-    return name
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((s) => s[0]?.toUpperCase() ?? "")
-      .join("");
-  }
-  return (email ?? "?").slice(0, 2).toUpperCase();
-}
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Layout placeholder per Batch A: nessuna sidebar (Batch B), solo header con
-  // brand a sinistra e identità + logout a destra. Sufficiente per chiudere
-  // il flusso di onboarding e validare auth + redirect.
   const { user, profile } = await getCurrentUserAndProfile();
 
+  const sidebarUser = {
+    email: user?.email ?? null,
+    full_name: profile?.full_name ?? null,
+    subscription_tier: profile?.subscription_tier ?? "free",
+  };
+
   return (
-    <div className="min-h-dvh flex flex-col bg-background text-foreground">
-      <header className="w-full border-b border-border bg-surface-container-low">
-        <div className="max-w-[1280px] mx-auto px-gutter h-16 flex items-center justify-between">
-          <span className="font-heading text-h3 text-foreground">[NOME_APP]</span>
-          <div className="flex items-center gap-3">
-            <span className="hidden sm:inline text-sm text-secondary">
-              {profile?.full_name ?? user?.email}
-            </span>
-            <Avatar className="h-9 w-9">
-              <AvatarFallback className="bg-secondary-container text-on-secondary-container text-xs font-semibold">
-                {initialsFor(profile?.full_name, user?.email)}
-              </AvatarFallback>
-            </Avatar>
-            <form action={signOutAction}>
-              <button
-                type="submit"
-                className="text-sm text-secondary hover:text-foreground transition-colors"
-              >
-                Esci
-              </button>
-            </form>
-          </div>
-        </div>
-      </header>
-      <main className="flex-1 w-full max-w-[1280px] mx-auto px-gutter py-12">
-        {children}
-      </main>
+    <div className="min-h-dvh bg-background text-foreground">
+      <DashboardSidebar user={sidebarUser} />
+      <div className="lg:pl-60">
+        <DashboardTopBar user={sidebarUser} />
+        <main className="px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+          <div className="mx-auto w-full max-w-[1280px]">{children}</div>
+        </main>
+      </div>
       <Toaster richColors position="top-center" closeButton />
     </div>
   );
