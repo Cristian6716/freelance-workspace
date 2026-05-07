@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { ChevronRightIcon, ExternalLinkIcon, PlusIcon } from "lucide-react";
+import { ChevronRightIcon, MailIcon, PlusIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { avatarColorFor, initialsFor } from "@/lib/utils";
 import { CLIENT_TYPE_LABELS } from "@/lib/validation/schemas";
 
@@ -74,10 +74,13 @@ export function WorkspaceHeader({ workspace }: Props) {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" disabled title="Disponibile in Batch C">
-            <ExternalLinkIcon className="h-4 w-4" />
-            Apri vista cliente
-          </Button>
+          <Link
+            href={`/workspace/${workspace.id}/settings#invite`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            <MailIcon className="h-4 w-4" />
+            Invita cliente
+          </Link>
           <Button disabled title="Disponibile in Batch D">
             <PlusIcon className="h-4 w-4" />
             Nuova fattura

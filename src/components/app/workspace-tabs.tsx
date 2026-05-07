@@ -17,10 +17,16 @@ const TABS: readonly Tab[] = [
   { key: "files", label: "File", href: (id) => `/workspace/${id}/files` },
   { key: "messages", label: "Messaggi", href: (id) => `/workspace/${id}/messages` },
   { key: "invoices", label: "Fatture", href: (id) => `/workspace/${id}/invoices`, soon: true },
-  { key: "settings", label: "Impostazioni", href: (id) => `/workspace/${id}/settings`, soon: true },
+  { key: "settings", label: "Impostazioni", href: (id) => `/workspace/${id}/settings` },
 ];
 
-export function WorkspaceTabs({ workspaceId }: { workspaceId: string }) {
+export function WorkspaceTabs({
+  workspaceId,
+  messagesUnreadCount = 0,
+}: {
+  workspaceId: string;
+  messagesUnreadCount?: number;
+}) {
   const pathname = usePathname();
 
   return (
@@ -36,6 +42,7 @@ export function WorkspaceTabs({ workspaceId }: { workspaceId: string }) {
           ? pathname === target || pathname.startsWith(`/workspace/${workspaceId}/projects`)
           : pathname === target || pathname.startsWith(`${target}/`);
         const disabled = tab.soon === true;
+        const showUnreadBadge = tab.key === "messages" && messagesUnreadCount > 0;
 
         return (
           <Link
@@ -55,6 +62,14 @@ export function WorkspaceTabs({ workspaceId }: { workspaceId: string }) {
             )}
           >
             {tab.label}
+            {showUnreadBadge && (
+              <span
+                className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground"
+                aria-label={`${messagesUnreadCount} non letti`}
+              >
+                {messagesUnreadCount > 9 ? "9+" : messagesUnreadCount}
+              </span>
+            )}
             {disabled && (
               <span className="rounded-full bg-surface-variant px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">
                 Presto

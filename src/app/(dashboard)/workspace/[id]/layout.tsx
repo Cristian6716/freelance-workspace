@@ -26,6 +26,15 @@ export default async function WorkspaceLayout({
     notFound();
   }
 
+  // Conteggio messaggi non letti scritti dal cliente (sender_member_id NOT NULL).
+  // Per il freelance, i messaggi del cliente sono quelli da leggere.
+  const { count: unreadFromClient } = await supabase
+    .from("messages")
+    .select("id", { count: "exact", head: true })
+    .eq("workspace_id", workspace.id)
+    .is("read_at", null)
+    .not("sender_member_id", "is", null);
+
   return (
     <div className="grid gap-8">
       <WorkspaceHeader
@@ -39,7 +48,7 @@ export default async function WorkspaceLayout({
           status: workspace.status,
         }}
       />
-      <WorkspaceTabs workspaceId={workspace.id} />
+      <WorkspaceTabs workspaceId={workspace.id} messagesUnreadCount={unreadFromClient ?? 0} />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="min-w-0">{children}</div>

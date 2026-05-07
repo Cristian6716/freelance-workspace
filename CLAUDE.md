@@ -222,12 +222,25 @@ SUPABASE_SERVICE_ROLE_KEY=
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 RESEND_API_KEY=
+RESEND_FROM_EMAIL=          # "[NOME_APP] <noreply@dominio.com>"
+RESEND_REPLY_TO=            # opzionale, override REPLY_TO per outreach
+MAGIC_LINK_JWT_SECRET=      # Batch C — openssl rand -base64 32, distinto da ENCRYPTION_KEY
 ENCRYPTION_KEY=
 PYVA_API_BASE_URL=          # solo dopo Sprint 5
 NEXT_PUBLIC_APP_URL=        # http://localhost:3000 in dev, dominio prod in prod
 ```
 
 `.env.example` (committato, senza valori): template per nuovi dev.
+
+**Generare i secret** (macOS/Linux/Git-bash):
+```
+openssl rand -base64 32
+```
+
+**Rotazione `MAGIC_LINK_JWT_SECRET`**: cambiarla invalida tutte le sessioni
+cliente attive (i magic link emessi continuano a funzionare al prossimo
+consume → nuovo cookie). Pianifica: rotazione coordinata con un avviso ai
+freelance attivi.
 
 ## Note sulle integrazioni
 
@@ -242,8 +255,18 @@ NEXT_PUBLIC_APP_URL=        # http://localhost:3000 in dev, dominio prod in prod
 - Crea prodotti/prezzi via Stripe Dashboard, NON da codice (evita drift)
 
 ### Resend
-- Tutti gli email template in `/src/lib/resend/templates/` come componenti React (react-email)
-- Sender unico: `noreply@[dominio-verificato]` per transazionali, `cristian@[dominio]` per outreach manuale
+- Tutti gli email template in `/src/lib/resend/templates/` come HTML inline (`renderEmailShell` + `ctaButton` da `templates/base.ts`). Niente react-email per ora: HTML inline più piccolo come bundle e più predicibile su Outlook/Gmail.
+- Sender unico: `noreply@[dominio-verificato]` (`RESEND_FROM_EMAIL`).
+- `sendEmail()` in `lib/resend/send.ts` è il wrapper unico: best-effort (skip se manca API key in dev, niente throw mai), logga errori senza PII.
+- Template Batch C: `client-invite`, `new-message`, `milestone-approved`, `milestone-revision`. Branded con logo+brand_color del freelance. Footer "Workspace gestito con [NOME_APP]" automatico, nascosto solo per `subscription_tier='studio'`.
+
+### Vista cliente (`/client/*` — Batch C)
+- Sessione cliente: cookie HttpOnly `nome_app_client_session` con JWT HS256 firmato da `MAGIC_LINK_JWT_SECRET` (path `/client`, 90 giorni rolling). NIENTE Supabase Auth per i clienti.
+- Pattern centrale: ogni Server Action sotto `actions/client-*.ts` chiama `requireClientSession()` (`lib/client-session.ts`) come PRIMA cosa, poi usa SERVICE_ROLE con guard manuale `record.workspace_id === session.workspaceId`.
+- Le RLS NON proteggono il cliente: il guard è APPLICATIVO. Niente eccezioni.
+- Il proxy ha pass-through totale su `/client/*`: il guard è a livello pagina/azione, non middleware.
+- File download: signed URL 1h via `getClientSignedFileUrlAction`, doppio guard `visibility='shared' AND workspace_id matching`.
+- Realtime non disponibile lato cliente (no auth.uid()): fallback polling 15s con `router.refresh()`.
 
 ## Cose da NON fare
 

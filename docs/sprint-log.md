@@ -238,3 +238,211 @@ Verifica: T10 dello smoke test RLS riproduce il bug (insert+RETURNING) e ora pas
 - Chat + Realtime: ~25 min
 - Validation e2e + lint fixes + sprint-log: ~25 min
 - **Totale ~5h30m**
+
+---
+
+## Batch C — Vista cliente (2026-05-07)
+
+**Obiettivo PRD §Batch C:** vista cliente accessibile via magic link, branded
+col profilo del freelance, con approvazione milestone, file shared, chat
+bidirezionale, notifiche email.
+
+### Decisioni materiali (con utente, prima di scrivere codice)
+
+1. **JWT expiry**: 90 giorni rolling + step-up OTP `<24h` per azioni sensibili
+   (Batch D fatture). Scelto su single-use 24h o 30 giorni multi-use.
+2. **Auth path**: JWT custom HS256 con `jose`. NIENTE Supabase Auth per i
+   clienti (no signup, no email verification, no password). Cookie HttpOnly
+   `nome_app_client_session`, path `/client`.
+3. **White-label**: solo logo + brand_color del freelance owner (letti da
+   `profiles.logo_url` + `profiles.brand_color`). Footer "Workspace gestito
+   con [NOME_APP]" nascosto SOLO per `subscription_tier='studio'`.
+4. **Approve milestone UX**: 1-click immediato + toast con countdown 5s e
+   bottone "Annulla" (gmail-style). Server `undoApproveMilestoneAction`
+   accetta solo entro 30s grace dal `approved_at` (safety contro race).
+
+### Niente migration DB
+
+Le tabelle Batch A+B coprono già tutto: `workspace_members.invite_token` UUID
+unique, `accepted_at`, `last_seen_at`, `messages.sender_member_id` con
+constraint exactly-one. Le mutate lato cliente passano per SERVICE_ROLE +
+guard manuale (PRD §1049: «le query lato cliente NON si appoggiano a RLS
+auth.uid()»).
+
+### Cosa è stato costruito
+
+- **Lib `client-session.ts`** (`jose` HS256):
+  - `signClientSessionToken(memberId, workspaceId)` → JWT con claims `{sub,ws,iat,exp}`.
+  - `verifyClientSessionToken(token)` → null su qualunque error (JWTExpired,
+    JWTInvalid, signature failed); niente token leak nei log.
+  - `setClientSessionCookie` / `clearClientSessionCookie`: HttpOnly, Secure
+    in prod, SameSite=Lax, path `/client`, max-age 90 giorni.
+  - `getClientSession` / `requireClientSession` / `assertClientWorkspaceAccess`:
+    guard centralizzati per pagine/Server Actions.
+
+- **Lib `resend/`**:
+  - `client.ts`: singleton `Resend` lazy.
+  - `send.ts`: wrapper unico `sendEmail()`. Best-effort: niente throw,
+    skip silenzioso se `RESEND_API_KEY` mancante (dev-friendly), log
+    error.code/tag senza body/recipient.
+  - `templates/base.ts`: `renderEmailShell` (table layout HTML inline,
+    table+inline-CSS per compat Outlook/Gmail) + `ctaButton`.
+  - 4 template: `client-invite`, `new-message`, `milestone-approved`,
+    `milestone-revision`. Branded con logo+brand_color, italiano caldo,
+    footer condizionale per studio tier.
+
+- **Server Actions**:
+  - `client-invites.ts` (lato freelance, auth Supabase):
+    `sendClientInviteAction({workspace_id, rotate_token?})`,
+    `revokeClientMemberAction(memberId)`. Crea/riusa `workspace_members`
+    role='client', genera URL `/client/{invite_token}`, invia email.
+  - `client-magic-link.ts` (lato cliente, no auth):
+    `consumeMagicLinkAction(token)` → SERVICE_ROLE lookup + expiry check
+    (>90 giorni `last_seen_at` → expired) + `setClientSessionCookie` +
+    update `accepted_at`/`last_seen_at`. `clientLogoutAction` cancella
+    cookie e redirect home.
+  - `client-mutations.ts` (lato cliente, richiede session):
+    `approveMilestoneAction`, `undoApproveMilestoneAction` (grace 30s
+    server-side), `requestMilestoneRevisionAction` (insert message +
+    email), `sendClientMessageAction`, `getClientSignedFileUrlAction`
+    (doppio guard `visibility='shared' AND workspace_id` + signed URL 1h),
+    `markClientMessagesReadAction`, `touchClientLastSeenAction`.
+    Tutte le mutate iniziano con `requireClientSession()` e usano
+    SERVICE_ROLE con guard manuale `record.workspace_id === session.workspaceId`.
+
+- **UI lato freelance**:
+  - Tab "Impostazioni" abilitata.
+  - `/(dashboard)/workspace/[id]/settings/page.tsx` con `ClientInviteCard`:
+    bottone "Invia invito email", "Reinvia", "Rigenera link"
+    (rotate_token=true), "Revoca accesso", input readonly URL + copia
+    clipboard, badge stato (in attesa / attivo / ultimo accesso).
+  - `WorkspaceHeader`: bottone "Apri vista cliente" rimpiazzato con
+    "Invita cliente" che linka a `settings#invite` (era `disabled` in B).
+  - `WorkspaceTabs`: badge unread sulla tab "Messaggi" che conta i
+    `messages` con `read_at IS NULL AND sender_member_id IS NOT NULL`
+    (cioè scritti dal cliente).
+  - `markMessagesReadAction` aggiornata: ora marca solo i messaggi del
+    CLIENTE, non quelli inviati dal freelance stesso.
+  - `MarkMessagesReadMount` Client Component triggera la mark-read al
+    mount della tab Messaggi.
+
+- **UI lato cliente** (`(client)/`):
+  - `layout.tsx`: branded chrome (sfondo `#FAF7F2`, topbar+footer). Se
+    `getClientSession()` è null, layout MINIMO (per `[token]` consumer e
+    `expired`). Se presente, fetch dati via `loadClientLayoutData(session)`
+    (memoizzato con `cache()`) + count unread + `<TouchLastSeen />`.
+  - `ClientTopbar`: logo+nome freelance a sx, nav (Panoramica/Progetti/
+    File/Messaggi/Fatture) con accent color brand, email cliente + form
+    POST `clientLogoutAction` a dx, badge unread sulla tab Messaggi.
+  - `ClientFooter`: "Workspace gestito con [NOME_APP]" nascosto per studio.
+  - `[token]/page.tsx`: validazione UUID + render `<ConsumeMagicLink>` che
+    al mount chiama `consumeMagicLinkAction`, set cookie, redirect `/client`.
+    Strict-mode safe (ref guard contro double-mount).
+  - `expired/page.tsx`: 5 reason copy distinte (expired / invalid / revoked
+    / no_session / wrong_workspace) con CTA "Torna alla home".
+  - `page.tsx` (panoramica): hero "BENTORNATO + Ciao {clientName}, ecco a
+    che punto siamo", grid 60/40 con `ClientProjectCard` (top 3 progetti
+    attivi) + sezione "Cosa serve da te" (lista milestone delivered con
+    deep-link `#m-{id}`) + sidebar Riepilogo / Ultima fattura placeholder
+    / Messaggio recente.
+  - `projects/page.tsx`: lista raggruppata per status (Attivi / Completati
+    / Archiviati) con `ClientProjectCard`.
+  - `projects/[projectId]/page.tsx`: detail con header (badge tipo+status,
+    importo/date), `ClientMilestoneList` (bullet visuale per status, per
+    ogni `delivered` bottone "Approva consegna" + "Richiedi modifiche"
+    con dialog), file shared del progetto.
+  - `ClientMilestoneList` (Client Component): approve = optimistic +
+    timer 5s, durante il quale è visibile "Annulla approvazione" che
+    chiama `undoApproveMilestoneAction`. Revisione: dialog con textarea,
+    submit chiama action che inserisce un messaggio + email freelance.
+  - `files/page.tsx`: lista file shared raggruppata per progetto con
+    `ClientFileRow` (download via `getClientSignedFileUrlAction`,
+    icona contestuale per mime type).
+  - `messages/page.tsx`: `ClientChat` con bubble cliente a destra (brand
+    color), freelance a sinistra. `useOptimistic` per pending message,
+    polling 15s (no realtime per anonimi), `markClientMessagesReadAction`
+    al mount.
+  - `invoices/page.tsx`: placeholder "In arrivo" (Batch D).
+
+### Sicurezza & RLS
+
+- ✓ Cookie sessione: HttpOnly + Secure (prod) + SameSite=Lax + Path=/client
+  + maxAge 90 giorni. Niente localStorage.
+- ✓ JWT HS256 con secret distinto da `ENCRYPTION_KEY`/SUPABASE keys.
+- ✓ Claims minimi: `sub` (memberId), `ws` (workspaceId), `iat`, `exp`.
+  Nessuna PII (no email, no nome).
+- ✓ Verify gestisce JWTExpired/JWTInvalid/JWSSignatureVerificationFailed
+  separatamente con catch-all → null. Niente token nei log.
+- ✓ Tutte le Server Actions cliente passano per `requireClientSession()` +
+  guard manuale `workspace_id === session.workspaceId` su ogni risorsa.
+- ✓ `undoApproveMilestoneAction`: grace 30s server-side per evitare
+  race con tab chiuse / azione tardiva.
+- ✓ File download: `visibility='shared'` + `workspace_id matching` +
+  `deleted_at IS NULL` prima di `createSignedUrl(3600)`.
+- ✓ `assertClientWorkspaceAccess(workspaceId)` esposta come pattern per
+  pagine future con workspaceId in URL.
+- ✓ `loadClientLayoutData` verifica che `member.workspace_id === session.workspaceId`
+  → difesa in profondità contro JWT tampering del claim `ws`.
+- ✓ Email best-effort: niente throw mai, log error.code soltanto.
+- ✓ Constraint DB exactly-one sender (T13 smoke): doppio sender bloccato.
+- ✓ `workspace_members.invite_token` UNIQUE globale (T14 smoke).
+
+### Vulnerabilità note (accettate)
+
+- 6 moderate npm audit ereditati da Batch A (postcss < 8.5.10). Re-check
+  ad ogni upgrade Next.
+
+### Validazione end-to-end
+
+- ✓ `npm run lint` clean
+- ✓ `npm run typecheck` clean (con `noUncheckedIndexedAccess` + `noImplicitReturns`)
+- ✓ `npm run build` succeed: 19 routes (8 nuove di Batch C: `/client`,
+  `/client/[token]`, `/client/expired`, `/client/projects`,
+  `/client/projects/[projectId]`, `/client/files`, `/client/messages`,
+  `/client/invoices`, `/workspace/[id]/settings`)
+- ✓ RLS smoke test 15/15 (T12 messages path cliente, T13 constraint
+  exactly-one violation, T14 invite_token UNIQUE, T15 visibility guard split)
+- ✓ Supabase advisor: only `auth_leaked_password_protection` warn (atteso)
+
+### Cose lasciate per Batch D+
+
+- Stripe billing + tier limits (Batch E) — `subscription_tier` hardcoded.
+- Recharts dashboard (Batch D).
+- Real fatture cliente (Batch D) — placeholder.
+- Step-up OTP per azioni sensibili approvazione fatture (Batch D).
+- Realtime presence "il freelance sta scrivendo…" (V2, opzionale PRD).
+- Upload file da cliente (V2 — il bucket è configurato per owner-only insert).
+- Custom domain white-label completo (V2).
+- Rate limiting magic link consume (V2 — token UUID v4 è già un guard
+  forte; rate limit basta a livello Vercel/Cloudflare).
+
+### Modifiche non-DB a file esistenti
+
+- `src/lib/env.ts`: aggiunti `MAGIC_LINK_JWT_SECRET` (required, min 32
+  char) e `RESEND_REPLY_TO` (optional).
+- `.env.example`: aggiunte le due var con commento generazione/rotazione.
+- `src/proxy.ts`: nessun cambio (pass-through `/client/*` già presente in B).
+- `src/components/app/workspace-tabs.tsx`: nuovo prop `messagesUnreadCount`,
+  badge stilizzato sulla tab Messaggi.
+- `src/components/app/workspace-header.tsx`: bottone "Apri vista cliente"
+  → `Link` a `/workspace/[id]/settings#invite` (CTA "Invita cliente").
+- `src/actions/messages.ts`: `markMessagesReadAction` filtra
+  `not("sender_member_id", "is", null)` per evitare di marcare i propri.
+- `src/lib/validation/schemas.ts`: aggiunti schemi Batch C (invite, consume,
+  message client, milestone revision/approve/undo, signed URL).
+- `package.json`: aggiunta dipendenza `jose`.
+
+### Migrations Batch C
+
+NESSUNA. Le invarianti coperte da SQL già esistenti.
+
+### Tempo speso
+
+- Pianificazione + 4 decisioni con utente: ~10 min
+- Lib (env, client-session jose, resend templates+send): ~50 min
+- Server Actions (3 file: invites, magic-link, mutations): ~45 min
+- UI freelance (settings + invite card + badge unread): ~25 min
+- UI cliente (layout + topbar + 8 page + 5 component): ~75 min
+- Smoke test extension + advisor + build + lint fixes: ~20 min
+- Docs (sprint-log + CLAUDE.md): ~15 min
+- **Totale ~4h00m**

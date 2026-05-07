@@ -389,3 +389,50 @@ export const messageCreateSchema = z.object({
   milestone_id: z.uuid().nullable().optional(),
 });
 export type MessageCreateInput = z.infer<typeof messageCreateSchema>;
+
+// =============================================================================
+// Batch C — Vista cliente: invito, magic link, mutazioni cliente
+// =============================================================================
+
+export const clientInviteSendSchema = z.object({
+  workspace_id: z.uuid(),
+  /** True per ruotare l'invite_token e invalidare la sessione cliente esistente. */
+  rotate_token: z.boolean().optional().default(false),
+});
+export type ClientInviteSendInput = z.infer<typeof clientInviteSendSchema>;
+
+export const clientInviteConsumeSchema = z.object({
+  token: z.uuid("Token non valido"),
+});
+
+export const clientMessageCreateSchema = z.object({
+  body: z
+    .string()
+    .trim()
+    .min(1, "Messaggio vuoto")
+    .max(8000, "Massimo 8000 caratteri"),
+  project_id: z.uuid().nullable().optional(),
+});
+export type ClientMessageCreateInput = z.infer<typeof clientMessageCreateSchema>;
+
+export const milestoneRevisionRequestSchema = z.object({
+  milestone_id: z.uuid(),
+  comment: z
+    .string()
+    .trim()
+    .min(1, "Inserisci un commento per il freelance")
+    .max(2000, "Massimo 2000 caratteri"),
+});
+export type MilestoneRevisionRequestInput = z.infer<typeof milestoneRevisionRequestSchema>;
+
+export const milestoneClientApproveSchema = z.object({
+  milestone_id: z.uuid(),
+});
+
+export const milestoneClientUndoSchema = z.object({
+  milestone_id: z.uuid(),
+});
+
+export const clientFileSignedUrlSchema = z.object({
+  file_id: z.uuid(),
+});

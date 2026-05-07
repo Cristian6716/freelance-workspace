@@ -25,6 +25,10 @@ const serverEnvSchema = z.object({
     .min(32, "ENCRYPTION_KEY must be at least 32 chars (use openssl rand -base64 32)"),
   RESEND_API_KEY: z.string().optional().default(""),
   RESEND_FROM_EMAIL: z.string().optional().default(""),
+  RESEND_REPLY_TO: z.string().optional().default(""),
+  MAGIC_LINK_JWT_SECRET: z
+    .string()
+    .min(32, "MAGIC_LINK_JWT_SECRET must be at least 32 chars (use openssl rand -base64 32)"),
   STRIPE_SECRET_KEY: z.string().optional().default(""),
   STRIPE_WEBHOOK_SECRET: z.string().optional().default(""),
   PYVA_MOCK: z
@@ -69,6 +73,8 @@ function parseServerEnv() {
     ENCRYPTION_KEY: process.env.ENCRYPTION_KEY,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
+    RESEND_REPLY_TO: process.env.RESEND_REPLY_TO,
+    MAGIC_LINK_JWT_SECRET: process.env.MAGIC_LINK_JWT_SECRET,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     PYVA_MOCK: process.env.PYVA_MOCK,

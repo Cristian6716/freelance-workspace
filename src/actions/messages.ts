@@ -78,9 +78,9 @@ export async function sendMessageAction(
 }
 
 // =============================================================================
-// markMessagesReadAction — marca tutti i messaggi non letti del workspace
-// come letti (read_at = now). Per ora non usiamo il read_at, ma la firma è qui
-// pronta per Batch C.
+// markMessagesReadAction — marca i messaggi del CLIENTE (sender_member_id
+// valorizzato) come letti dal freelance. Non tocca i messaggi inviati
+// dall'owner stesso. Chiamato in onMount della tab Messaggi.
 // =============================================================================
 export async function markMessagesReadAction(
   workspaceId: string
@@ -91,13 +91,15 @@ export async function markMessagesReadAction(
     .from("messages")
     .update({ read_at: new Date().toISOString() })
     .eq("workspace_id", workspaceId)
-    .is("read_at", null);
+    .is("read_at", null)
+    .not("sender_member_id", "is", null);
 
   if (error) {
     console.error("[messages/mark-read]:", error.code, error.message);
     return { ok: false, error: GENERIC_ERROR };
   }
 
+  revalidatePath(`/workspace/${workspaceId}`);
   revalidatePath(`/workspace/${workspaceId}/messages`);
   return { ok: true };
 }

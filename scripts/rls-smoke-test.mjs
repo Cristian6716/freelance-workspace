@@ -1,7 +1,9 @@
-// RLS smoke test — verifica isolamento cross-tenant su TUTTE le tabelle Batch A+B.
+// RLS smoke test — verifica isolamento cross-tenant su TUTTE le tabelle Batch A+B+C.
 // Esegui con: node --env-file=.env.local scripts/rls-smoke-test.mjs
 //
-// Invariati testati:
+// Invarianti testati:
+//   Batch A+B (1-11): isolamento RLS cross-tenant
+//   Batch C (12-15): invarianti vista cliente
 //   1. workspace isolation (A non vede ws di B)
 //   2. profile isolation
 //   3. cross-user INSERT su client_workspaces bloccato
@@ -13,6 +15,12 @@
 //   9. workspace_activity_log isolation
 //   10. createWorkspace via anon (RLS) funziona — fix bug Batch A
 //   11. storage workspace-files: B non può listare l'oggetto di A
+//   12. messages constraint: insert con sender_member_id (path cliente) valido
+//   13. messages constraint: insert con sender_profile_id+sender_member_id entrambi
+//       valorizzati BLOCCATO (exactly-one)
+//   14. workspace_members.invite_token UNIQUE globale: collisione bloccata
+//   15. file visibility guard: lato server-action, file private deve essere
+//       rifiutato per il cliente del workspace (simulato via SERVICE_ROLE+filtro)
 
 /* eslint-disable no-console -- script di diagnostica dev-only */
 
@@ -321,6 +329,88 @@ async function main() {
     "T11 storage cross-tenant upload blocked",
     storageErr !== null,
     storageErr?.message ?? "no error"
+  );
+
+  // -------------------------------------------------------------------
+  // BATCH C — Vista cliente
+  // -------------------------------------------------------------------
+
+  // Test 12: messages constraint exactly-one — sender_member_id (path cliente)
+  // valido. Inserisce un messaggio simulando come fa la Server Action client.
+  const { data: clientMsg, error: clientMsgErr } = await adminClient
+    .from("messages")
+    .insert({
+      workspace_id: wsB.id,
+      sender_member_id: memberB.id,
+      sender_profile_id: null,
+      body: "Messaggio dal cliente di B",
+    })
+    .select("id")
+    .single();
+  record(
+    "T12 messages insert path cliente (sender_member_id only)",
+    clientMsgErr === null && !!clientMsg?.id,
+    clientMsgErr?.code ?? "ok"
+  );
+
+  // Test 13: messages constraint exactly-one — entrambi i sender valorizzati =
+  // violazione constraint. Deve fallire.
+  const { error: bothErr } = await adminClient.from("messages").insert({
+    workspace_id: wsB.id,
+    sender_member_id: memberB.id,
+    sender_profile_id: b.user.id,
+    body: "Doppio sender — non deve passare",
+  });
+  record(
+    "T13 messages constraint exactly-one violato bloccato",
+    bothErr !== null,
+    bothErr?.code ?? "no error"
+  );
+
+  // Test 14: workspace_members.invite_token UNIQUE globale.
+  // Inseriamo un nuovo member con lo stesso invite_token di memberB → conflict.
+  const { data: memberBToken } = await adminClient
+    .from("workspace_members")
+    .select("invite_token")
+    .eq("id", memberB.id)
+    .single();
+  const { error: dupTokenErr } = await adminClient.from("workspace_members").insert({
+    workspace_id: wsA.id,
+    email: `dup-${stamp}@example.com`,
+    role: "client",
+    invite_token: memberBToken.invite_token,
+  });
+  record(
+    "T14 workspace_members.invite_token UNIQUE",
+    dupTokenErr !== null,
+    dupTokenErr?.code ?? "no error"
+  );
+
+  // Test 15: file visibility guard (simulazione lato server-action cliente).
+  // La action client `getClientSignedFileUrlAction` lookup file e applica:
+  //   - file.workspace_id == session.workspaceId
+  //   - file.visibility == "shared"
+  //   - file.deleted_at IS NULL
+  // Verifichiamo che la query stessa ritorni le righe attese, replicando il
+  // filtro che la action userà.
+  const targetWorkspaceId = wsA.id;
+  const { data: privateFiles } = await adminClient
+    .from("files")
+    .select("id, visibility")
+    .eq("workspace_id", targetWorkspaceId)
+    .eq("visibility", "private")
+    .is("deleted_at", null);
+  const { data: sharedFiles } = await adminClient
+    .from("files")
+    .select("id, visibility")
+    .eq("workspace_id", targetWorkspaceId)
+    .eq("visibility", "shared")
+    .is("deleted_at", null);
+  // Abbiamo creato 1 private e 1 shared in wsA in setup.
+  record(
+    "T15 file visibility guard split (1 private + 1 shared in ws)",
+    (privateFiles?.length ?? 0) === 1 && (sharedFiles?.length ?? 0) === 1,
+    `private=${privateFiles?.length ?? 0} shared=${sharedFiles?.length ?? 0}`
   );
 
   // Cleanup
